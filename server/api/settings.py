@@ -42,16 +42,20 @@ ALLOWED_HOSTS = (
 # Application definition
 
 INSTALLED_APPS = [
+    "jazzmin",  # Must be before django.contrib.admin
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sitemaps",  # For SEO sitemaps
     "django_extensions",
     "rest_framework",
     "corsheaders",
+    "meta",  # django-meta for SEO
     "api.healthcheck",
+    "blog",  # Our blog app
 ]
 
 MIDDLEWARE = [
@@ -68,8 +72,10 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    FRONTEND_URL
 ]
+
+if FRONTEND_URL:
+    CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
 
 ROOT_URLCONF = "api.urls"
 
@@ -95,16 +101,27 @@ WSGI_APPLICATION = "api.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("POSTGRES_NAME") or "postgres",
-        "USER": os.environ.get("POSTGRES_USER") or "postgres",
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD") or "password",
-        "HOST": os.environ.get("POSTGRES_HOST") or "host.docker.internal",
-        "PORT": os.environ.get("POSTGRES_PORT") or 5432,
+# Use SQLite for development/testing if PostgreSQL is not available
+USE_SQLITE = os.environ.get("USE_SQLITE", "False").lower() == "true"
+
+if USE_SQLITE:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("POSTGRES_NAME") or "postgres",
+            "USER": os.environ.get("POSTGRES_USER") or "postgres",
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD") or "password",
+            "HOST": os.environ.get("POSTGRES_HOST") or "host.docker.internal",
+            "PORT": os.environ.get("POSTGRES_PORT") or 5432,
+        }
+    }
 
 
 # Password validation
@@ -157,3 +174,105 @@ STATICFILES_DIRS = ("static",)
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Media files (user uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Jazzmin Admin Configuration
+JAZZMIN_SETTINGS = {
+    "site_title": "Blog Admin",
+    "site_header": "Blog Administration",
+    "site_brand": "Cyberpunk Blog",
+    "site_logo": None,
+    "welcome_sign": "Welcome to the Blog Admin Dashboard",
+    "copyright": "Blog Admin",
+    "search_model": ["blog.Post", "auth.User"],
+    
+    # Top Menu
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Blog", "url": "/admin/blog/post/", "permissions": ["blog.view_post"]},
+        {"name": "Frontend", "url": FRONTEND_URL, "new_window": True},
+    ],
+    
+    # User Menu
+    "usermenu_links": [
+        {"model": "auth.user"}
+    ],
+    
+    # Side Menu
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": ["auth", "blog"],
+    
+    # Icons
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "blog.Post": "fas fa-blog",
+        "blog.Category": "fas fa-folder",
+        "blog.Tag": "fas fa-tags",
+        "blog.Comment": "fas fa-comments",
+    },
+    
+    # Branding
+    "custom_css": None,
+    "custom_js": None,
+    "use_google_fonts_cdn": True,
+    "show_ui_builder": False,
+    
+    # UI Tweaks
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "auth.user": "collapsible",
+        "auth.group": "vertical_tabs"
+    },
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-dark",
+    "accent": "accent-purple",
+    "navbar": "navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-purple",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "darkly",
+    "dark_mode_theme": "darkly",
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}
+
+# REST Framework Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+}
+
