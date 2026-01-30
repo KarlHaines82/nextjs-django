@@ -292,3 +292,9 @@ dist
 .DS_Store
 
 opt/
+
+# Media files (user uploads) - comment out if you want to track them
+server/media/
+
+# Static files
+server/static_files/
