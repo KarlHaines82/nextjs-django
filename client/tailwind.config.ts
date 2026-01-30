@@ -21,6 +21,7 @@ const config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
+        mono: ["Courier New", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -56,6 +57,16 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Cyberpunk theme colors
+        cyber: {
+          pink: "#FF006E",
+          blue: "#00F0FF",
+          purple: "#8B00FF",
+          green: "#00FF41",
+          yellow: "#FFFF00",
+          dark: "#0A0E27",
+          darker: "#050816",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -71,10 +82,34 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "glow": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
+        },
+        "slide-up": {
+          "0%": { transform: "translateY(100px)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        "flicker": {
+          "0%, 19%, 21%, 23%, 25%, 54%, 56%, 100%": {
+            opacity: "1",
+          },
+          "20%, 24%, 55%": {
+            opacity: "0.4",
+          },
+        },
+        "scan": {
+          "0%": { transform: "translateY(-100%)" },
+          "100%": { transform: "translateY(100%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "glow": "glow 2s ease-in-out infinite",
+        "slide-up": "slide-up 0.5s ease-out",
+        "flicker": "flicker 3s linear infinite",
+        "scan": "scan 8s linear infinite",
       },
     },
   },
