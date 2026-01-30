@@ -101,16 +101,27 @@ WSGI_APPLICATION = "api.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("POSTGRES_NAME") or "postgres",
-        "USER": os.environ.get("POSTGRES_USER") or "postgres",
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD") or "password",
-        "HOST": os.environ.get("POSTGRES_HOST") or "host.docker.internal",
-        "PORT": os.environ.get("POSTGRES_PORT") or 5432,
+# Use SQLite for development/testing if PostgreSQL is not available
+USE_SQLITE = os.environ.get("USE_SQLITE", "False").lower() == "true"
+
+if USE_SQLITE:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("POSTGRES_NAME") or "postgres",
+            "USER": os.environ.get("POSTGRES_USER") or "postgres",
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD") or "password",
+            "HOST": os.environ.get("POSTGRES_HOST") or "host.docker.internal",
+            "PORT": os.environ.get("POSTGRES_PORT") or 5432,
+        }
+    }
 
 
 # Password validation
